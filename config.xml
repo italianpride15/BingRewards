@@ -44,7 +44,7 @@
             <notify if="%P gt 475"
                     cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
 
-            <account ref="Live_kimp1992@live.com.com">
+            <account ref="Live_kimp1992@live.com">
                 <retry if="%p lt 31" interval="15" salt="13.5" count="3" />
                 <notify if="%p ne 31"
                         cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
