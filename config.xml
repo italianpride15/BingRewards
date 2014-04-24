@@ -16,62 +16,61 @@
     -->
 
     <accounts>
-        <account type="Facebook" disabled="false">
-            <login>john.smith@gmail.com</login>
-            <password>xxx</password>
-        </account>
-        <account type="Facebook" disabled="true">
-            <login>blabla@mail.com</login>
-            <password>xxx</password>
+        <account type="Live" disabled="false">
+            <login>kimp1992@live.com</login>
+            <password>DELLDELL12</password>
         </account>
         <account type="Live" disabled="false">
-            <login>gogo@hotmail.com</login>
-            <password>xxx</password>
+            <login>vimp1991@hotmail.com</login>
+            <password>DELLDELL12</password>
         </account>
         <account type="Live" disabled="false">
-            <login>hoho@hotmail.com</login>
-            <password>xxx</password>
+            <login>jimp1990@live.com</login>
+            <password>DELLDELL12</password>
         </account>
     </accounts>
 
     <events>
         <onError>
             <retry interval="15" salt="13.5" count="3" />
-            <notify cmd="/home/BingRewards/bin/BingRewards/notify/onError.sh %a %p %r %P %l %i %e" />
+            <notify cmd="/home/nathan/github/bingrewards/BingRewards/notify/onError.sh %a %p %r %P %l %i %e" />
         </onError>
         <onComplete>
             <retry if="%p lt 16" interval="15" salt="13.5" count="3" />
             <notify if="%l gt 3000"
-                    cmd='/home/BingRewards/bin/BingRewards/notify/onComplete_reached.sh %a %p %r %P %l %i "reached %l Life Credits"' />
+                    cmd='/home/nathan/github/bingrewards/BingRewards/notify/onComplete_reached.sh %a %p %r %P %l %i "reached %l Life Credits"' />
             <notify if="%p ne 16"
-                    cmd="/home/BingRewards/bin/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+                    cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
             <notify if="%P gt 475"
-                    cmd="/home/BingRewards/bin/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+                    cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
 
-            <account ref="Live_gogo@hotmail.com">
-                <retry if="%p lt 16" interval="15" salt="13.5" count="3" />
-                <notify if="%l gt 750"
-                        cmd='/home/BingRewards/bin/BingRewards/notify/onComplete_reached.sh %a %p %r %P %l %i "Gold with %l Life Credits"' />
-                <notify if="%p ne 16"
-                        cmd="/home/BingRewards/bin/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
-                <notify if="%P gt 475"
-                        cmd="/home/BingRewards/bin/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
-            </account>
-            <account ref="Facebook_john.smith@gmail.com">
+            <account ref="Live_kimp1992@live.com.com">
                 <retry if="%p lt 31" interval="15" salt="13.5" count="3" />
-                <notify if="%l gt 10000"
-                        cmd='/home/BingRewards/bin/BingRewards/notify/onComplete_reached.sh %a %p %r %P %l %i "reached %l Life Credits"' />
                 <notify if="%p ne 31"
-                        cmd="/home/BingRewards/bin/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+                        cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
                 <notify if="%P gt 475"
-                        cmd="/home/BingRewards/bin/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+                        cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+            </account>
+            <account ref="Live_vimp1991@hotmail.com">
+                <retry if="%p lt 16" interval="15" salt="13.5" count="3" />
+                <notify if="%p ne 16"
+                        cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+                <notify if="%P gt 475"
+                        cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+            </account>
+            <account ref="Live_jimp1990@live.com">
+                <retry if="%p lt 16" interval="15" salt="13.5" count="3" />
+                <notify if="%p ne 16"
+                        cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
+                <notify if="%P gt 475"
+                        cmd="/home/nathan/github/bingrewards/BingRewards/notify/onComplete.sh %a %p %r %P %l %i" />
             </account>
         </onComplete>
         <onScriptComplete>
-            <notify cmd="/home/BingRewards/bin/BingRewards/notify/onScriptComplete.sh -mail" />
+            <notify cmd="/home/nathan/github/bingrewards/BingRewards/notify/onScriptComplete.sh -mail" />
         </onScriptComplete>
         <onScriptFailure>
-            <notify cmd="/home/BingRewards/bin/BingRewards/notify/onScriptFailure.sh -mail" />
+            <notify cmd="/home/nathan/github/bingrewards/BingRewards/notify/onScriptFailure.sh -mail" />
         </onScriptFailure>
     </events>
 </configuration>
