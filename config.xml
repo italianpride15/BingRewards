@@ -29,7 +29,7 @@
             <password>DELLDELL12</password>
         </account>
     </accounts>
-
+	<!--
     <events>
         <onError>
             <retry interval="15" salt="13.5" count="3" />
@@ -72,7 +72,7 @@
         <onScriptFailure>
             <notify cmd="/home/nathan/github/bingrewards/BingRewards/notify/onScriptFailure.sh -mail" />
         </onScriptFailure>
-    </events>
+    </events> -->
 
     <!--
       - generator="MODULE" must be a module in pkg/queryGenerators

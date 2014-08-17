@@ -1,6 +1,9 @@
 BingRewards
 ===========
 
+Crontab:
+0 13 * * * sleep $[RANDOM \% 120]m ; python2 /home/nathan/bingrewards/BingRewards/main.py 2>&1 | gzip > /home/nathan/bingrewards/var/log/`date "+\%Y-\%m-\%dT\%H:\%M:\%S"`.log.gz
+
 Automation to earn Bing reward points with Facebook and Live credentials.
 
 - For more information, including how to use this, please, take a look at my blog post:
