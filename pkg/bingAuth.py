@@ -6,6 +6,7 @@ import HTMLParser
 import random
 import urllib
 import urllib2
+import re
 
 import bingCommon
 import helpers
@@ -41,6 +42,20 @@ class BingAuth:
         self.opener = opener
         self.httpHeaders = httpHeaders
 
+    @staticmethod
+    def _escapeString(s):
+        t = (
+            # encoding          marker
+            ( 'unicode_escape', re.compile("\\\\u[0-9a-fA-F]{4}") ),
+            ( 'string-escape',  re.compile("\\\\x[0-9a-fA-F]{2}") )
+        )
+
+        for encoding, marker in t:
+            if marker.search(s):
+                return s.decode(encoding)
+
+        raise AuthenticationError( "s = '%s' can not be decoded with these encodings: [ %s ]" % ( s, ", ".join( ( e for e, m in t ) ) ) )
+
     def __authenticateFacebook(self, login, password):
         """
         Authenticates a user on bing.com with his/her Facebook account.
@@ -63,10 +78,7 @@ class BingAuth:
         s += len('"Facebook":"')
         e = page.index('"', s)
 
-# the URL contains escape characters (http:// is http\x3a\x2f\x2f, for example)
-# this needs to be decoded back to normal URL
-# see (http://docs.python.org/2/library/codecs.html#python-specific-encodings)
-        url = page[s:e].decode('string-escape')
+        url = BingAuth._escapeString(page[s:e])
 
         s = url.index('sig=')
         s += len('sig=')
@@ -144,10 +156,7 @@ class BingAuth:
         s += len('"WindowsLiveId":"')
         e = page.index('"', s)
 
-# the URL contains escape characters (http:// is http\x3a\x2f\x2f, for example)
-# this needs to be decoded back to normal URL
-# see (http://docs.python.org/2/library/codecs.html#python-specific-encodings)
-        url = page[s:e].decode('string-escape')
+        url = BingAuth._escapeString(page[s:e])
 
         request = urllib2.Request(url = url, headers = self.httpHeaders)
         request.add_header("Referer", bingCommon.BING_URL)
@@ -170,12 +179,6 @@ class BingAuth:
         PPSX = page[s:e]
         if PPSX[0] == "'":
             PPSX = PPSX[1:-1]
-
-# get sso parameter
-        s = page.index(",W:")
-        s += len(",W:")
-        e = page.index(",", s)
-        sso = page[s:e]
 
 # generate ClientLoginTime
         clt = 20000 + int(random.uniform(0, 1000))
@@ -204,7 +207,6 @@ class BingAuth:
             "PPSX"          : str(PPSX),
             "idsbho"        : "1",
             "LoginOptions"  : "3",
-            "sso"           : sso,
             "NewUser"       : "1",
             "i1"            : "0",                  # ClientUserSaved
             "i2"            : "1",                  # ClientMode

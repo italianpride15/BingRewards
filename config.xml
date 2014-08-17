@@ -73,4 +73,12 @@
             <notify cmd="/home/nathan/github/bingrewards/BingRewards/notify/onScriptFailure.sh -mail" />
         </onScriptFailure>
     </events>
+
+    <!--
+      - generator="MODULE" must be a module in pkg/queryGenerators
+      - current modules:
+      -     bing - uses today's bing news page. Generates terms which may be partial words.
+      -     wikipedia - uses today's wikipedia. Generates terms with whole words.
+    -->
+    <queries generator="wikipedia" />
 </configuration>

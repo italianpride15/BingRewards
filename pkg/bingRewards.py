@@ -11,12 +11,12 @@ import random
 import time
 import urllib
 import urllib2
+import importlib
 
 import bingCommon
 import bingFlyoutParser as bfp
 import bingHistory
 import helpers
-from bingQueriesGenerator import BingQueriesGenerator, BING_NEWS_URL
 
 # extend urllib.addinfourl like it defines @contextmanager (to use with "with" keyword)
 urllib.addinfourl.__enter__ = lambda self: self
@@ -47,7 +47,7 @@ class BingRewards:
 
     BING_FLYOUT_PAGE = "http://www.bing.com/rewardsapp/flyoutpage?style=v2"
 
-    def __init__(self, httpHeaders, config):
+    def __init__(self, httpHeaders, userAgents, config):
         """
         From _config_ these parameters are used:
             config.general.betweenQueriesInterval - (double) - how many seconds the script should wait between queries
@@ -58,6 +58,8 @@ class BingRewards:
         self.betweenQueriesInterval = float(config.general.betweenQueriesInterval)
         self.betweenQueriesSalt     = float(config.general.betweenQueriesSalt)
         self.httpHeaders = httpHeaders
+        self.userAgents  = userAgents
+        self.queryGenerator = config.queryGenerator
 
         cookies = cookielib.CookieJar()
 
@@ -113,10 +115,26 @@ class BingRewards:
             page = helpers.getResponseBody(response)
 
 # parse dashboard page
-        s = page.index('<div class="credits-right')
-        s += len('<div class="credits-right')
-        s = page.index('<div class="credits', s)
-        s += len('<div class="credits')
+        s = page.find('<div class="credits-right')
+        d = page.find('<span class="credits-right')
+        
+        if s != -1:
+            s += len('<div class="credits-right')
+            s = page.index('<div class="credits', s)
+            s += len('<div class="credits')
+        
+        elif d != -1:
+            d += len('<span class="credits-right')
+            d = page.index('<div class="credits', d)
+            d += len('<div class="credits')
+            s = d
+        
+        else:
+            s = page.index('<div class="data-lifetime')
+            s += len('<div class="data-lifetime')
+            s = page.index('<div class="data-value-text', s)
+            s += len('<div class="data-value-text')
+
         s = page.index(">", s) + 1
         e = page.index('</div>', s)
 
@@ -169,7 +187,8 @@ class BingRewards:
         """Processes bfp.Reward.Type.Action.SEARCH and returns self.RewardResult"""
 
         BING_QUERY_URL = 'http://www.bing.com/search?q='
-        BING_QUERY_SUCCESSFULL_RESULT_MARKER = '<div id="b_content">'
+        BING_QUERY_SUCCESSFULL_RESULT_MARKER_PC = '<div id="b_content">'
+        BING_QUERY_SUCCESSFULL_RESULT_MARKER_MOBILE = '<div id="content">'
 
         res = self.RewardResult(reward)
         if reward.isAchieved():
@@ -177,10 +196,6 @@ class BingRewards:
             return res
 
         indCol = bfp.Reward.Type.Col.INDEX
-        if reward.tp[indCol] != bfp.Reward.Type.SEARCH_AND_EARN[indCol]:
-            res.isError = True
-            res.message = "Don't know how to process this search"
-            return res
 
 # get a set of queries from today's Bing! history
         url = bingHistory.getBingHistoryTodayURL()
@@ -199,17 +214,36 @@ class BingRewards:
 # adjust to the current progress
         searchesCount -= reward.progressCurrent * rewardCost
 
-        request = urllib2.Request(url = BING_NEWS_URL, headers = self.httpHeaders)
-        with self.opener.open(request) as response:
-            page = helpers.getResponseBody(response)
+        headers = self.httpHeaders
 
-# generate a set of queries to run
-        bingQueriesGenerator = BingQueriesGenerator(searchesCount, history)
-        queries = bingQueriesGenerator.parseBingNews(page)
+        if reward.tp == bfp.Reward.Type.SEARCH_PC:
+            headers["User-Agent"] = self.userAgents.pc
+            print
+            print "Running PC searches"
+            print
+        elif reward.tp == bfp.Reward.Type.SEARCH_MOBILE:
+            headers["User-Agent"] = self.userAgents.mobile
+            print
+            print "Running mobile searches"
+            print
+        else:
+            res.isError = True
+            res.message = "Don't know how to process this search"
+            return res
+
+        # Import the query generator
+        try:
+            qg = importlib.import_module(self.queryGenerator, package=None)
+            queryGenerator = qg.queryGenerator(self)
+        except ImportError:
+            raise TypeError("{0} is not a module".format(self.queryGenerator))
+        # generate a set of queries to run
+        queries = queryGenerator.generateQueries(searchesCount, history)
+
         if len(queries) < searchesCount:
-            print "Warning: not enough queries to run were generated !"
+            print "Warning: not enough queries to run were generated!"
             print "Requested:", searchesCount
-            print "Generated:", len(bingQueriesGenerator.queries)
+            print "Generated:", len(queries)
 
         successfullQueries = 0
         i = 1
@@ -230,7 +264,10 @@ class BingRewards:
                 page = helpers.getResponseBody(response)
 
 # check for the successfull marker
-            if page.find(BING_QUERY_SUCCESSFULL_RESULT_MARKER) == -1:
+            found = page.find(BING_QUERY_SUCCESSFULL_RESULT_MARKER_PC) != -1 \
+                 or page.find(BING_QUERY_SUCCESSFULL_RESULT_MARKER_MOBILE) != -1
+
+            if not found:
                 filename = helpers.dumpErrorPage(page)
                 print "Warning! Query:"
                 print "\t" + query

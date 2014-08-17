@@ -1,4 +1,70 @@
-Current version 3.4.4
+Current version 3.7
+
+3.7     *) @amayer5125, Add Wikipedia Query Generator Module
+           Generate queries pulled from the current days wikipedia page
+           (ie. http://en.wikipedia.org/wiki/August_14)
+           Make Wikipedia Query Generator the default query generator
+
+3.6     *) @amayer5125, Make Query Generators Into Dynamic Modlues
+           Move bingQueriesGenerator to queryGenerators folder
+           main.py add queryGenerators folder to PATH
+           Add <queries> tag to config file
+           Modify config.py to read <queries> tag
+           Make bingQueriesGenerator dynamic loadable
+
+3.5.10  *) Fixed https://github.com/sealemar/BingRewards/issues/68
+           Credits to @ssgdodd, see
+           https://github.com/sealemar/BingRewards/issues/68#issuecomment-52050514
+
+3.5.9   *) @amayer5125, Remove iPad User Agent From Mobile Agents
+
+        *) Fixed https://github.com/sealemar/BingRewards/issues/66
+
+3.5.8   *) @TunaLobster, Fixed https://github.com/sealemar/BingRewards/issues/58
+
+        +) Added logic to check when the dashboard page uses <span> instead of <div>
+
+3.5.7   *) Fixed https://github.com/sealemar/BingRewards/issues/56
+
+        *) pkg.bingAuth.BingAuth._escapeString() changed perfect match of hex character to
+           a regexp.
+
+3.5.6   +) Added retry support for a relatively rare exception
+
+                [Errno 104] Connection reset by peer
+
+           see http://stackoverflow.com/a/20568874/2147244
+           for explanation of the problem
+
+        *) Fixed https://github.com/sealemar/BingRewards/pull/53#issuecomment-46684688
+           In this change the escape method is determined automatically. Two are supported:
+           'string-escape', 'unicode_escape'
+
+3.5.5   *) @amayer5125, Change escape string type from string-escape to unicode_escape.
+           Fixes login issue.
+           See https://github.com/sealemar/BingRewards/issues/52
+           and https://github.com/sealemar/BingRewards/issues/50
+
+3.5.4   *) Fixed https://github.com/sealemar/BingRewards/issues/49
+           Should have been a part of 3.5.3 - commit 6223139
+
+3.5.3   *) Fixed https://github.com/sealemar/BingRewards/issues/45#issuecomment-45700693
+           Two bugs were addressed:
+           1. bingAuth - sso is not used any more
+           2. bingQueriesGenerator - Bing! spontaneously returns PC style page for mobile
+              searches. This fix check for both of them.
+
+3.5.2   *) @JustLikeIcarus Added missing commas to list of mobile user agents
+
+3.5.1   *) Fixed https://github.com/sealemar/BingRewards/issues/37
+
+3.5     +) Implemented mobile searches as per
+           https://github.com/sealemar/BingRewards/issues/16
+
+           A pair of PC user agent and Mobile user agent for the searches are
+           chosen at random for every account
+
+        *) Fixed https://github.com/sealemar/BingRewards/issues/33
 
 3.4.4   *) Adding support for multiple proxy protocols in config.xml as per
            https://github.com/sealemar/BingRewards/issues/23#issuecomment-40173913

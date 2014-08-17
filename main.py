@@ -14,7 +14,11 @@ import sys
 import time
 import urllib2
 
+from socket import error as SocketError
+import errno
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "pkg"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "pkg", "queryGenerators"))
 
 from bingAuth import BingAuth, AuthenticationError
 from bingRewards import BingRewards
@@ -27,10 +31,10 @@ import helpers
 verbose = False
 totalPoints = 0
 
-SCRIPT_VERSION = "3.4.4"
-SCRIPT_DATE = "April 14, 2014"
+SCRIPT_VERSION = "3.7"
+SCRIPT_DATE = "August 14, 2014"
 
-def earnRewards(config, httpHeaders, reportItem, password):
+def earnRewards(config, httpHeaders, userAgents, reportItem, password):
     """Earns Bing! reward points and populates reportItem"""
     noException = False
     try:
@@ -43,7 +47,7 @@ def earnRewards(config, httpHeaders, reportItem, password):
         reportItem.error = None
         reportItem.pointsEarned = 0
 
-        bingRewards = BingRewards(httpHeaders, config)
+        bingRewards = BingRewards(httpHeaders, userAgents, config)
         bingAuth    = BingAuth(httpHeaders, bingRewards.opener)
         bingAuth.authenticate(reportItem.accountType, reportItem.accountLogin, password)
         reportItem.oldPoints = bingRewards.getRewardsPoints()
@@ -94,6 +98,16 @@ def earnRewards(config, httpHeaders, reportItem, password):
         reportItem.error = e
         print "Failed to reach the server."
         print "Reason: ", e.reason
+
+    except SocketError as e:
+        if e.errno != errno.ECONNRESET:
+            raise
+
+        # see http://stackoverflow.com/a/20568874/2147244
+        # for explanation of the problem
+
+        reportItem.error = e
+        print "Connection reset by peer."
 
     finally:
         if not noException:
@@ -151,7 +165,7 @@ def __stringifyAccount(reportItem, strLen):
     return s
 
 
-def __processAccount(config, httpHeaders, reportItem, accountPassword):
+def __processAccount(config, httpHeaders, userAgents, reportItem, accountPassword):
     global totalPoints
     eventsProcessor = EventsProcessor(config, reportItem)
     while True:
@@ -160,7 +174,7 @@ def __processAccount(config, httpHeaders, reportItem, accountPassword):
         if reportItem.retries > 1:
             print "retry #" + str(reportItem.retries)
 
-        earnRewards(config, httpHeaders, reportItem, accountPassword)
+        earnRewards(config, httpHeaders, userAgents, reportItem, accountPassword)
         totalPoints += reportItem.pointsEarned
 
         result, extra = eventsProcessor.processReportItem()
@@ -183,9 +197,11 @@ def __processAccountUserAgent(config, account, userAgents, doSleep):
     reportItem.accountType  = account.accountType
     reportItem.accountLogin = account.accountLogin
 
+    agents = bingCommon.UserAgents.generate()
+
     httpHeaders = bingCommon.HEADERS
     httpHeaders["User-Agent"] = userAgents[ random.randint(0, len(userAgents) - 1) ]
-    __processAccount(config, httpHeaders, reportItem, account.password)
+    __processAccount(config, httpHeaders, agents, reportItem, account.password)
 
     return reportItem
 
